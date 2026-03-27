@@ -5,7 +5,7 @@ import os
 intents = discord.Intents.all()
 bot = discord.Client(intents=intents)
 
-DEEPL_API_KEY = "fb04155f-fc1b-49d3-ad63-992b24ba91a6:fx"
+DEEPL_API_KEY = os.environ.get("DEEPL_API_KEY")
 
 LANGUAGES = {
      "🇫🇷": "FR",
