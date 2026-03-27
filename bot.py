@@ -53,5 +53,6 @@ async def on_reaction_add(reaction, user):
         mention_author=False
     )
 
-TOKEN = "MTQ4Njc2MzQzNDM1NDY3MTY4Ng.GUq0-_.DpD2Q7GrMDTrGd7RaBtbgedMN6_ipuGxd-uj-c"
+import os
+TOKEN = os.environ.get("DISCORD_TOKEN")
 bot.run(TOKEN)
