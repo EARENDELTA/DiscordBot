@@ -8,7 +8,7 @@ bot = discord.Client(intents=intents)
 DEEPL_API_KEY = os.environ.get("DEEPL_API_KEY")
 
 LANGUAGES = {
-     "🇫🇷": "FR",
+    "🇫🇷": "FR",
     "🇬🇧": "EN-GB",
     "🇺🇸": "EN-US",
     "🇪🇸": "ES",
@@ -42,6 +42,10 @@ LANGUAGES = {
 
 translator = deepl.Translator(DEEPL_API_KEY)
 
+# Dictionnaire pour mémoriser les traductions
+# {message_original_id: [id_traduction1, id_traduction2, ...]}
+translations = {}
+
 @bot.event
 async def on_ready():
     print(f"✅ Bot connecté : {bot.user}")
@@ -67,11 +71,27 @@ async def on_reaction_add(reaction, user):
     except Exception as e:
         translated = f"❌ Erreur : {str(e)}"
 
-    await reaction.message.reply(
+    reply = await reaction.message.reply(
         f"{emoji} **Traduction en `{target_lang}` :**\n{translated}",
         mention_author=False
     )
 
-import os
+    # Mémorise la traduction
+    original_id = reaction.message.id
+    if original_id not in translations:
+        translations[original_id] = []
+    translations[original_id].append(reply.id)
+
+@bot.event
+async def on_message_delete(message):
+    if message.id in translations:
+        for translation_id in translations[message.id]:
+            try:
+                translation_msg = await message.channel.fetch_message(translation_id)
+                await translation_msg.delete()
+            except:
+                pass
+        del translations[message.id]
+
 TOKEN = os.environ.get("DISCORD_TOKEN")
 bot.run(TOKEN)
