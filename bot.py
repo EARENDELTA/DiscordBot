@@ -8,17 +8,36 @@ bot = discord.Client(intents=intents)
 DEEPL_API_KEY = "fb04155f-fc1b-49d3-ad63-992b24ba91a6:fx"
 
 LANGUAGES = {
-    "🇫🇷": "FR",
+     "🇫🇷": "FR",
     "🇬🇧": "EN-GB",
+    "🇺🇸": "EN-US",
     "🇪🇸": "ES",
     "🇩🇪": "DE",
     "🇮🇹": "IT",
     "🇵🇹": "PT-PT",
+    "🇧🇷": "PT-BR",
     "🇨🇳": "ZH",
     "🇯🇵": "JA",
     "🇸🇦": "AR",
     "🇷🇺": "RU",
     "🇰🇷": "KO",
+    "🇳🇱": "NL",
+    "🇵🇱": "PL",
+    "🇸🇪": "SV",
+    "🇩🇰": "DA",
+    "🇫🇮": "FI",
+    "🇨🇿": "CS",
+    "🇷🇴": "RO",
+    "🇭🇺": "HU",
+    "🇺🇦": "UK",
+    "🇧🇬": "BG",
+    "🇸🇰": "SK",
+    "🇸🇮": "SL",
+    "🇪🇪": "ET",
+    "🇱🇻": "LV",
+    "🇱🇹": "LT",
+    "🇮🇩": "ID",
+    "🇹🇷": "TR",
 }
 
 translator = deepl.Translator(DEEPL_API_KEY)
