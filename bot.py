@@ -41,9 +41,6 @@ LANGUAGES = {
 }
 
 translator = deepl.Translator(DEEPL_API_KEY)
-
-# Dictionnaire pour mémoriser les traductions
-# {message_original_id: [id_traduction1, id_traduction2, ...]}
 translations = {}
 
 @bot.event
@@ -51,16 +48,18 @@ async def on_ready():
     print(f"✅ Bot connecté : {bot.user}")
 
 @bot.event
-async def on_reaction_add(reaction, user):
-    if user.bot:
+async def on_raw_reaction_add(payload):
+    if payload.user_id == bot.user.id:
         return
 
-    emoji = str(reaction.emoji)
+    emoji = str(payload.emoji)
     if emoji not in LANGUAGES:
         return
 
+    channel = bot.get_channel(payload.channel_id)
+    message = await channel.fetch_message(payload.message_id)
     target_lang = LANGUAGES[emoji]
-    message_text = reaction.message.content
+    message_text = message.content
 
     if not message_text:
         return
@@ -71,16 +70,14 @@ async def on_reaction_add(reaction, user):
     except Exception as e:
         translated = f"❌ Erreur : {str(e)}"
 
-    reply = await reaction.message.reply(
+    reply = await message.reply(
         f"{emoji} **Traduction en `{target_lang}` :**\n{translated}",
         mention_author=False
     )
 
-    # Mémorise la traduction
-    original_id = reaction.message.id
-    if original_id not in translations:
-        translations[original_id] = []
-    translations[original_id].append(reply.id)
+    if message.id not in translations:
+        translations[message.id] = []
+    translations[message.id].append(reply.id)
 
 @bot.event
 async def on_message_delete(message):
