@@ -42,22 +42,16 @@ LANGUAGES = {
 
 translator = deepl.Translator(DEEPL_API_KEY)
 translations = {}
+processed_reactions = set()
 
-@bot.event
-async def on_ready():
-    print(f"✅ Bot connecté : {bot.user}")
-
-@bot.event
-async def on_reaction_add(reaction, user):
-    if user.bot:
+async def translate_and_reply(message, emoji, user_id):
+    reaction_key = f"{message.id}-{emoji}-{user_id}"
+    if reaction_key in processed_reactions:
         return
-
-    emoji = str(reaction.emoji)
-    if emoji not in LANGUAGES:
-        return
+    processed_reactions.add(reaction_key)
 
     target_lang = LANGUAGES[emoji]
-    message_text = reaction.message.content
+    message_text = message.content
 
     if not message_text:
         return
@@ -68,14 +62,40 @@ async def on_reaction_add(reaction, user):
     except Exception as e:
         translated = f"❌ Erreur : {str(e)}"
 
-    reply = await reaction.message.reply(
+    reply = await message.reply(
         f"{emoji} **Traduction en `{target_lang}` :**\n{translated}",
         mention_author=False
     )
 
-    if reaction.message.id not in translations:
-        translations[reaction.message.id] = []
-    translations[reaction.message.id].append(reply.id)
+    if message.id not in translations:
+        translations[message.id] = []
+    translations[message.id].append(reply.id)
+
+@bot.event
+async def on_ready():
+    print(f"✅ Bot connecté : {bot.user}")
+
+@bot.event
+async def on_reaction_add(reaction, user):
+    if user.bot:
+        return
+    emoji = str(reaction.emoji)
+    if emoji not in LANGUAGES:
+        return
+    await translate_and_reply(reaction.message, emoji, user.id)
+
+@bot.event
+async def on_raw_reaction_add(payload):
+    if payload.user_id == bot.user.id:
+        return
+    emoji = str(payload.emoji)
+    if emoji not in LANGUAGES:
+        return
+    channel = bot.get_channel(payload.channel_id)
+    if channel is None:
+        return
+    message = await channel.fetch_message(payload.message_id)
+    await translate_and_reply(message, emoji, payload.user_id)
 
 @bot.event
 async def on_message_delete(message):
