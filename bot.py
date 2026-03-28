@@ -48,18 +48,16 @@ async def on_ready():
     print(f"✅ Bot connecté : {bot.user}")
 
 @bot.event
-async def on_raw_reaction_add(payload):
-    if payload.user_id == bot.user.id:
+async def on_reaction_add(reaction, user):
+    if user.bot:
         return
 
-    emoji = str(payload.emoji)
+    emoji = str(reaction.emoji)
     if emoji not in LANGUAGES:
         return
 
-    channel = bot.get_channel(payload.channel_id)
-    message = await channel.fetch_message(payload.message_id)
     target_lang = LANGUAGES[emoji]
-    message_text = message.content
+    message_text = reaction.message.content
 
     if not message_text:
         return
@@ -70,14 +68,14 @@ async def on_raw_reaction_add(payload):
     except Exception as e:
         translated = f"❌ Erreur : {str(e)}"
 
-    reply = await message.reply(
+    reply = await reaction.message.reply(
         f"{emoji} **Traduction en `{target_lang}` :**\n{translated}",
         mention_author=False
     )
 
-    if message.id not in translations:
-        translations[message.id] = []
-    translations[message.id].append(reply.id)
+    if reaction.message.id not in translations:
+        translations[reaction.message.id] = []
+    translations[reaction.message.id].append(reply.id)
 
 @bot.event
 async def on_message_delete(message):
